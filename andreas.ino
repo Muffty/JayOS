@@ -1,5 +1,105 @@
 
-int ashParticles[8][16];
+// interactive logic
+
+void Andreas_loop()
+{
+
+    randomSeed(analogRead(0));
+
+    Andreas_gameUpdate();
+}
+
+int RED = 0;
+int YELLOW = 1;
+int GREEN = 2;
+int BLUE = 3;
+
+void Andreas_gameUpdate()
+{
+
+        Andreas_Draw();
+
+    if(skipFrameCount < 30){
+        skipFrameCount++;
+        return;
+    }
+    else{
+        skipFrameCount = 0;
+    }
+
+    Andreas_Particles();
+
+    seedOverTime++;
+
+    if (button_downEvent[GREEN])
+    {
+        characterPosX++;
+        if (characterPosX > 8)
+            characterPosX = 8;
+    }
+
+    if (button_downEvent[BLUE])
+    {
+        characterPosX--;
+        if (characterPosX < 0)
+            characterPosX = 0;
+    }
+
+    if (button_downEvent[RED])
+    {
+        characterPosY += 3;
+    }
+    else if (characterPosY > 0)
+        characterPosY--;
+}
+
+// In-game draw logic
+void Andreas_Draw()
+{
+    Andreas_DrawSky();
+    Andreas_DisplayCharacter();
+}
+
+void Andreas_DrawSky()
+{
+    for (int y = 0; y < 16; y++)
+    {
+        for (int x = 0; x < 8; x++)
+        {
+            Andreas_ShowPixel(x, y, Andreas_getColor(COLOR_BLUE, 62 - (y * 4)));
+        }
+    }
+}
+
+int ashParticlesX[8];
+int ashParticlesY[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
+
+void Andreas_Particles() {
+
+  int rand = random(1000);
+
+  if(rand == 1){
+    int randPos = random(8); 
+    ashParticleY[randPos] = 15;
+    ashParticleX[randPos] = randPos;
+  }
+
+  for (int i = 0; i < 8; i++) {
+    if(ashParticlesY[i] < 0)
+      continue;
+    Andreas_ShowPixel(ashParticlesX[i], ashParticlesY[i], Andreas_getColor(COLOR_ORANGE, 70));
+    ashParticlesY[i]--;
+  }
+}
+
+void Andreas_DisplayCharacter()
+{
+
+    Andreas_ShowPixel(characterPosX, characterPosY, Andreas_getColor(COLOR_PURPLE, 100));
+    Andreas_ShowPixel(characterPosX, characterPosY + 1, Andreas_getColor(COLOR_PURPLE, 100));
+}
+
+// Graphic functions
 
 const int COLOR_RED = 0;
 const int COLOR_GREEN = 1;
@@ -56,19 +156,7 @@ uint32_t Andreas_getColor(int colorID, int intensity)
     return pixels.Color(R * intensity / 100, G * intensity / 100, B * intensity / 100);
 }
 
-int RED = 0;
-int YELLOW = 1;
-int GREEN = 2;
-int BLUE = 3;
-
-void Andreas_loop()
-{
-
-    randomSeed(analogRead(0));
-
-    Andreas_gameUpdate();
-}
-
+// show a pixel : ShowPixel(X, Y, getColor(COLOR_X, INTENSITY 0 to 100 ));
 void Andreas_ShowPixel(int X, int Y, uint32_t color)
 {
 
@@ -92,107 +180,3 @@ int characterPosY = 0;
 int seedOverTime = 0;
 
 int skipFrameCount = 0;
-// show a pixel : ShowPixel(X, Y, getColor(COLOR_X, INTENSITY 0 to 100 ));
-void Andreas_gameUpdate()
-{
-
-        Andreas_Draw();
-
-    if(skipFrameCount < 30){
-        skipFrameCount++;
-        return;
-    }
-    else{
-        skipFrameCount = 0;
-    }
-
-
-    seedOverTime++;
-
-    Andreas_MakeAshRain();
-
-
-    if (button_downEvent[GREEN])
-    {
-        characterPosX++;
-        if (characterPosX > 8)
-            characterPosX = 8;
-    }
-
-    if (button_downEvent[BLUE])
-    {
-        characterPosX--;
-        if (characterPosX < 0)
-            characterPosX = 0;
-    }
-
-    if (button_downEvent[RED])
-    {
-        characterPosY += 3;
-    }
-    else if (characterPosY > 0)
-        characterPosY--;
-}
-void Andreas_Draw()
-{
-
-    Andreas_DrawSky();
-    Andreas_DrawParticles();
-    Andreas_DisplayCharacter();
-}
-
-void Andreas_DrawSky()
-{
-    for (int y = 0; y < 16; y++)
-    {
-        for (int x = 0; x < 8; x++)
-        {
-            Andreas_ShowPixel(x, y, Andreas_getColor(COLOR_BLUE, 62 - (y * 4)));
-        }
-    }
-}
-
-void Andreas_MakeAshRain()
-{
-
-    for (int x = 0; x < 8; x++)
-    {
-        int randNumber = random(1000);
-        if (randNumber == 1)
-        {
-            ashParticles[x][15] = 1;
-        }
-    }
-
-    for (int y = 0; y < 16; y++)
-    {
-        for (int x = 0; x < 8; x++)
-        {
-            if (ashParticles[x][y] == 1)
-            {
-                ashParticles[x][y] = 0;
-                ashParticles[x][y - 1] = 1;
-            }
-        }
-    }
-}
-
-void Andreas_DrawParticles()
-{
-    for (int y = 0; y < 16; y++)
-    {
-        for (int x = 0; x < 8; x++)
-        {
-
-            if (ashParticles[x][y] == 1)
-                Andreas_ShowPixel(x, y, Andreas_getColor(COLOR_ORANGE, 70));
-        }
-    }
-}
-
-void Andreas_DisplayCharacter()
-{
-
-    Andreas_ShowPixel(characterPosX, characterPosY, Andreas_getColor(COLOR_PURPLE, 100));
-    Andreas_ShowPixel(characterPosX, characterPosY + 1, Andreas_getColor(COLOR_PURPLE, 100));
-}
